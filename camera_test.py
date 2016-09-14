@@ -10,20 +10,48 @@ Notes:
 """
 from PIL import Image
 import subprocess
-from subprocess import call
+from subprocess import call, Popen, PIPE
 import commands
+import time
+import re
+import pandas as pd
+import StringIO
 
-filenumber = '1120'
+filenumber = '965'
+
+
 
 def list_files():
-    call ("gphoto2 " +
-          "--list-files",
-          shell=True)
+    #call ("gphoto2 " +
+    #      "--list-files",
+    #      shell=True)
+    import subprocess
+    p = subprocess.Popen(['gphoto2', '--list-files'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    result = p.communicate()[0]
+    return result
+
+def get_filenumber(file_list):
+        
+    df = pd.read_csv(StringIO.StringIO(file_list),
+                       header=None,
+                       comment='T',
+                       sep=r'\s*',
+                       names=['file_number', 'img_number', 'rd_col', 'file_size', 'kb_col', 'file_type'],
+                       usecols=['file_number', 'img_number', 'file_type'],
+                       engine='python')
+
+    df = df.dropna(how='any')
+    df = df[df.file_type == 'image/jpeg']
+    df.file_number = df.file_number.str[1:]
+    df.file_number = df.file_number.convert_objects(convert_numeric=True)
+    df.img_number = df.img_number.str.replace('[^0-9]', '').astype(float)
+    high_filenumber = df.file_number[df.img_number.idxmax()]
+    return(high_filenumber)
 
 def checknum():
     call ("gphoto2 " +
           "--folder " +
-          "/store_00020001/DCIM/100CANON " +
+          "/store_00020001/DCIM/101CANON " +
           "--num-files",
           shell=True)
 
@@ -33,20 +61,25 @@ def capture_image():
           shell=True)
 
 def get_file():
+
+    filename = "photobooth_" + time.strftime("%Y-%m-%d-%H-%M-%S")
+    
     call ('gphoto2 ' +
           '--get-file ' +
           '%s ' % filenumber +
           '--filename ' +
-          'whatever2.jpg',
+          '%s' % filename,
           shell=True)
 
 
 
 
-capture_image()
-checknum()
+#capture_image()
+#checknum()
 #get_file()
-#list_files()
+file_list = list_files()
+filenumber = get_filenumber(file_list)
+print(filenumber)
 
 '''
 #output = subprocess.Popen([checknum()], stdout=subprocess.PIPE).communicate()[0]
@@ -105,3 +138,10 @@ gphoto2 --folder
 
 
 """
+
+##each_line = file_list.split('\n')
+##jpeg_pattern = re.compile('*JPG')
+##
+##for m in each_line:
+##    n = re.search('JPG', each_line)
+##    print n
