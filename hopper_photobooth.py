@@ -32,6 +32,7 @@ focus_pin = 22
 shutter_pin = 12
 
 camera_did_not_trigger_filename = "/home/pi/Documents/Python-Photobooth/images/camera_did_not_trigger.png"
+processing_filename = "/home/pi/Documents/Python-Photobooth/images/processing.png"
 image_directory = "/home/pi/Documents/photobooth_pics/"
 image_filename = "WRONG_FILENAME"
 #filenumber = '965'
@@ -40,7 +41,7 @@ monitor_w = 1280
 monitor_h = 800
 transform_x = 1200 # how wide to scale the jpg when replaying
 transfrom_y = 800 # how high to scale the jpg when replaying
-offset_x = 40 # how far off to left corner to display photos
+offset_x = 50 # how far off to left corner to display photos
 offset_y = 0 # how far off to left corner to display photos
 backg_fill = 0,0,0
 
@@ -58,7 +59,7 @@ def init_pygame():
     size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
     pygame.display.set_caption('Photo Booth Pics')
     pygame.display.set_mode(size).fill(backg_fill)
-    pygame.mouse.set_visible(True) #hide the mouse cursor
+    pygame.mouse.set_visible(False) #hide the mouse cursor
     return pygame.display.set_mode(size, pygame.FULLSCREEN)
     #return pygame.display.set_mode(size, pygame.RESIZABLE)
 
@@ -102,7 +103,7 @@ def get_file(filenumber, image_filename):
           shell=True)
 
 def show_image(image_filename):
-    screen = init_pygame()
+    #screen = init_pygame()
     screen.fill(backg_fill)
     img=pygame.image.load(image_filename) 
     img = pygame.transform.scale(img,(transform_x,transfrom_y))
@@ -116,12 +117,13 @@ pygame.init()
 #modes = pygame.display.list_modes()
 #pygame.display.set_mode(max(modes))
 size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
-pygame.display.set_mode(size, pygame.RESIZABLE)
-screen = pygame.display.get_surface()
-pygame.display.set_caption('Photo Booth Pics')
-#pygame.mouse.set_visible(False) #hide the mouse cursor
-#pygame.display.toggle_fullscreen()
+#pygame.display.set_mode(size, pygame.RESIZABLE)
 
+pygame.display.set_mode(size, pygame.FULLSCREEN)
+#pygame.display.set_caption('Photo Booth Pics')
+pygame.mouse.set_visible(False) #hide the mouse cursor
+#pygame.display.toggle_fullscreen()
+screen = pygame.display.get_surface()
 # use RPi board pin numbers
 GPIO.setmode(GPIO.BOARD)
 
@@ -171,6 +173,16 @@ def take_picture(pin):
 ##          '--capture-image',
 ##          shell=True)
 ##    return
+    
+def check_for_updated_filenumber(original_filenumber):
+    time_end = time.time() + 3
+    
+    while time.time() < time_end:
+        file_list = list_files()
+        filenumber = get_filenumber(file_list)
+        if filenumber != original_filenumber:
+            return filenumber
+    return original_filenumber
 
 def start_photobooth():
     time.sleep(0.05)
@@ -180,20 +192,21 @@ def start_photobooth():
         #time.sleep(1)
         return
 
+    screen.fill( (0,0,0) )
+    pygame.display.update()
+    
     file_list = list_files()
     original_filenumber = get_filenumber(file_list)    
 
-    screen.fill( (0,0,0) )
-    pygame.display.update()
     time.sleep(0.25)
 
     focus_and_blink(focus_pin,LED_pin)
     take_picture(shutter_pin)
+
+    show_image(processing_filename)
+
+    filenumber = check_for_updated_filenumber(original_filenumber)
     
-    time.sleep(0.5)
-    
-    file_list = list_files()
-    filenumber = get_filenumber(file_list)
 
     if filenumber == original_filenumber:
         show_image(camera_did_not_trigger_filename)
@@ -213,9 +226,6 @@ def start_photobooth():
         
 """ START DOING THINGS """
 
-file_list = list_files()
-global filenumber
-filenumber = get_filenumber(file_list)
 
 while True:
     input(pygame.event.get())
