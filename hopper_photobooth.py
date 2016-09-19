@@ -1,28 +1,21 @@
-# Listen for a press from momentary switch (GPIO-23 / pin 16 - GND), then:
-# Blink an LED connected from GPIO 17 (pin 11) to ground (pin 6)
+
 
 """ SETUP  """
 import os
-import glob
+#import glob
 import time
-import traceback
-from time import sleep
+#import traceback
 import RPi.GPIO as GPIO
-import atexit
-import sys
-import socket
+#import atexit
+#import sys
+#import socket
 import pygame
 from pygame.locals import QUIT, KEYDOWN, K_ESCAPE
-# import config
 from signal import alarm, signal, SIGALRM, SIGKILL
 import subprocess
 from subprocess import call
-import commands
-from threading import Thread
-import time
-import subprocess
-from subprocess import call
-import commands
+#import commands
+#from threading import Thread
 import pandas as pd
 import StringIO
 
@@ -31,20 +24,17 @@ switch_pin = 16
 focus_pin = 22
 shutter_pin = 12
 
-camera_did_not_trigger_filename = "/home/pi/Documents/Python-Photobooth/images/camera_did_not_trigger.png"
-processing_filename = "/home/pi/Documents/Python-Photobooth/images/processing.png"
-image_directory = "/home/pi/Documents/photobooth_pics/"
-image_filename = "WRONG_FILENAME"
-#filenumber = '965'
-
 monitor_w = 1280
 monitor_h = 800
 transform_x = 1200 # how wide to scale the jpg when replaying
-transfrom_y = 800 # how high to scale the jpg when replaying
+transform_y = 800 # how high to scale the jpg when replaying
 offset_x = 50 # how far off to left corner to display photos
 offset_y = 0 # how far off to left corner to display photos
 backg_fill = 0,0,0
 
+camera_did_not_trigger_filename = "/home/pi/Documents/Python-Photobooth/images/camera_did_not_trigger.png"
+processing_filename = "/home/pi/Documents/Python-Photobooth/images/processing.png"
+image_directory = "/home/pi/Documents/photobooth_pics/"
 
 # A function to handle keyboard/mouse/device input events    
 def input(events):
@@ -52,14 +42,12 @@ def input(events):
         if (event.type == pygame.QUIT or
             (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE)):
             pygame.quit()
-                
    
 def init_pygame():
     pygame.init()
     size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
-    pygame.display.set_caption('Photo Booth Pics')
     pygame.display.set_mode(size).fill(backg_fill)
-    pygame.mouse.set_visible(False) #hide the mouse cursor
+    pygame.mouse.set_visible(False) # Hides the mouse cursor
     return pygame.display.set_mode(size, pygame.FULLSCREEN)
     #return pygame.display.set_mode(size, pygame.RESIZABLE)
 
@@ -73,7 +61,8 @@ def list_files():
     return result
 
 def get_filenumber(file_list):
-        
+    # Note:  This breaks if your SD card reaches img_9999 and starts over at img_0001 in the middle of the wedding reception.
+    # TO DO: Regex currently grabs ALL numeric characters, even the 2 in ".CR2"
     df = pd.read_csv(StringIO.StringIO(file_list),
                        header=None,
                        comment='T',
@@ -88,10 +77,6 @@ def get_filenumber(file_list):
     df.file_number = df.file_number.convert_objects(convert_numeric=True)
     df.img_number = df.img_number.str.replace('[^0-9]', '').astype(float)
     high_filenumber = df.file_number[df.img_number.idxmax()]
-    #print(high_filenumber)
-
-    #high_filenumber = int(high_filenumber) + 2
-    #print(high_filenumber)
     return(high_filenumber)
 
 def get_file(filenumber, image_filename):
@@ -103,37 +88,11 @@ def get_file(filenumber, image_filename):
           shell=True)
 
 def show_image(image_filename):
-    #screen = init_pygame()
     screen.fill(backg_fill)
-    img=pygame.image.load(image_filename) 
-    img = pygame.transform.scale(img,(transform_x,transfrom_y))
-    screen.blit(img,(offset_x,offset_y))
+    img = pygame.image.load(image_filename) 
+    img = pygame.transform.scale(img, (transform_x, transform_y))
+    screen.blit(img, (offset_x, offset_y))
     pygame.display.flip()
-
-
-
-# initialize pygame
-pygame.init()
-#modes = pygame.display.list_modes()
-#pygame.display.set_mode(max(modes))
-size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
-#pygame.display.set_mode(size, pygame.RESIZABLE)
-
-pygame.display.set_mode(size, pygame.FULLSCREEN)
-#pygame.display.set_caption('Photo Booth Pics')
-pygame.mouse.set_visible(False) #hide the mouse cursor
-#pygame.display.toggle_fullscreen()
-screen = pygame.display.get_surface()
-# use RPi board pin numbers
-GPIO.setmode(GPIO.BOARD)
-
-# set up GPIO output channel
-GPIO.setup(LED_pin,GPIO.OUT)
-GPIO.setup(focus_pin,GPIO.OUT)
-GPIO.setup(shutter_pin,GPIO.OUT)
-
-# set up switch
-GPIO.setup(switch_pin, GPIO.IN, pull_up_down = GPIO.PUD_UP)
 
 def blink(pin):
 
@@ -149,18 +108,18 @@ def blink(pin):
         time.sleep(0.05)
     return
 
-def focus_and_blink(f_pin,l_pin):
-    GPIO.output(f_pin,GPIO.HIGH)
-    for i in range(0,4):
-        GPIO.output(l_pin,GPIO.HIGH)
+def focus_and_blink(f_pin, l_pin):
+    GPIO.output(f_pin, GPIO.HIGH)
+    for i in range(0, 4):
+        GPIO.output(l_pin, GPIO.HIGH)
         time.sleep(0.25)
-        GPIO.output(l_pin,GPIO.LOW)
+        GPIO.output(l_pin, GPIO.LOW)
         time.sleep(0.25)
-    GPIO.output(f_pin,GPIO.LOW)
-    for i in range(0,10):
-        GPIO.output(l_pin,GPIO.HIGH)
+    GPIO.output(f_pin, GPIO.LOW)
+    for i in range(0, 10):
+        GPIO.output(l_pin, GPIO.HIGH)
         time.sleep(0.05)
-        GPIO.output(l_pin,GPIO.LOW)
+        GPIO.output(l_pin, GPIO.LOW)
         time.sleep(0.05)
     return
 
@@ -168,15 +127,9 @@ def take_picture(pin):
     GPIO.output(pin,GPIO.HIGH)
     time.sleep(0.5)
     GPIO.output(pin,GPIO.LOW)
-
-##    call ('gphoto2 ' +
-##          '--capture-image',
-##          shell=True)
-##    return
     
-def check_for_updated_filenumber(original_filenumber):
-    time_end = time.time() + 3
-    
+def check_for_updated_filenumber(original_filenumber, timeout_limit = 3):
+    time_end = time.time() + timeout_limit
     while time.time() < time_end:
         file_list = list_files()
         filenumber = get_filenumber(file_list)
@@ -184,15 +137,19 @@ def check_for_updated_filenumber(original_filenumber):
             return filenumber
     return original_filenumber
 
-def start_photobooth():
+def test_if_real_button_press():
     time.sleep(0.05)
     if GPIO.input(switch_pin) != GPIO.LOW:
-        #screen.fill( (200,0,0) )
-        #pygame.display.update()
-        #time.sleep(1)
+        return False
+    else if GPIO.input(switch_pin) == GPIO.LOW:
+        return True
+
+def start_photobooth():
+    
+    if test_if_real_button_press() == False:
         return
 
-    screen.fill( (0,0,0) )
+    screen.fill(backg_fill)
     pygame.display.update()
     
     file_list = list_files()
@@ -206,7 +163,6 @@ def start_photobooth():
     show_image(processing_filename)
 
     filenumber = check_for_updated_filenumber(original_filenumber)
-    
 
     if filenumber == original_filenumber:
         show_image(camera_did_not_trigger_filename)
@@ -217,15 +173,30 @@ def start_photobooth():
             get_file(filenumber, image_filename)
         except pygame.error:
             show_image(camera_did_not_trigger_filename)
-
-        try:
-            show_image(image_filename)
-        except pygame.error:
-            show_image(camera_did_not_trigger_filename)
+        
+        show_image(image_filename)
 
         
 """ START DOING THINGS """
 
+# use RPi board pin numbers
+GPIO.setmode(GPIO.BOARD)
+
+# set up GPIO output channel
+GPIO.setup(LED_pin,GPIO.OUT)
+GPIO.setup(focus_pin,GPIO.OUT)
+GPIO.setup(shutter_pin,GPIO.OUT)
+
+# set up switch
+GPIO.setup(switch_pin, GPIO.IN, pull_up_down = GPIO.PUD_UP)
+
+# initialize pygame
+pygame.init()
+size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
+#pygame.display.set_mode(size, pygame.RESIZABLE)
+pygame.display.set_mode(size, pygame.FULLSCREEN)
+pygame.mouse.set_visible(False)
+screen = pygame.display.get_surface()
 
 while True:
     input(pygame.event.get())
