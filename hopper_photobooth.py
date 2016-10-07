@@ -94,33 +94,18 @@ def show_image(image_filename):
     screen.blit(img, (offset_x, offset_y))
     pygame.display.flip()
 
-def blink(pin):
-
-    for i in range(0,4):
-        GPIO.output(pin,GPIO.HIGH)
-        time.sleep(0.25)
-        GPIO.output(pin,GPIO.LOW)
-        time.sleep(0.25)
-    for i in range(0,10):
-        GPIO.output(pin,GPIO.HIGH)
-        time.sleep(0.05)
-        GPIO.output(pin,GPIO.LOW)
-        time.sleep(0.05)
-    return
+def blink_led(pin, num_times, segment_duration):
+    for i in range(0, num_times):
+        GPIO.output(pin, GPIO.HIGH)
+        time.sleep(segment_duration)
+        GPIO.output(pin, GPIO.LOW)
+        time.sleep(segment_duration)
 
 def focus_and_blink(f_pin, l_pin):
     GPIO.output(f_pin, GPIO.HIGH)
-    for i in range(0, 4):
-        GPIO.output(l_pin, GPIO.HIGH)
-        time.sleep(0.25)
-        GPIO.output(l_pin, GPIO.LOW)
-        time.sleep(0.25)
+    blink_led(l_pin, num_times = 4, segment_duration = 0.25)
     GPIO.output(f_pin, GPIO.LOW)
-    for i in range(0, 10):
-        GPIO.output(l_pin, GPIO.HIGH)
-        time.sleep(0.05)
-        GPIO.output(l_pin, GPIO.LOW)
-        time.sleep(0.05)
+    blink_led(l_pin, num_times = 10, segment_duration = 0.05)
     return
 
 def take_picture(pin):
