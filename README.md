@@ -6,13 +6,14 @@ I've been to a number of weddings and other events that have photobooths, and th
 
 When I got married, I wanted to have a photobooth that had all the fun stuff (i.e. silly props) that encouraged people to take lots of pictures, but I also wanted them to be able to keep those pictures in digital form to use on social media, or print out and frame.  I built a photobooth that uses a DSLR to take high-quality pictures and is controlled by a Raspberry Pi, which coordinates the trigger (a big red button on the floor so guests don't have to move after they get their pose ready), the camera, and a 10" screen.  The photobooth displays the image after taking it, so guests get the immediate satisfaction of seeing their picture, and saves the full-size images to be shared later on social media or printed out.
 
+![photobooth](/images/photobooth_with_preview_350x500.jpg)
+
 Here are the steps involved:
 
 1. Guests strike a pose and step on an invitingly large red button on the floor
 2. LEDs flash to draw attention to the camera lens
 3. Camera takes the picture
-4. Picture is displayed on-screen for immediate viewing\
-![photobooth](/images/photobooth_with_preview_350x500.jpg)
+4. Picture is displayed on-screen for immediate viewing
 5. RAW image stays on camera for later retrieval
 
 
