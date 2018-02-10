@@ -1,6 +1,3 @@
-# Listen for a press from momentary switch (GPIO-23 / pin 16 - GND), then:
-# Blink an LED connected from GPIO 17 (pin 11) to ground (pin 6)
-
 """ SETUP  """
 import os
 import glob
@@ -13,7 +10,6 @@ import sys
 import socket
 import pygame
 from pygame.locals import QUIT, KEYDOWN, K_ESCAPE
-# import config
 from signal import alarm, signal, SIGALRM, SIGKILL
 import subprocess
 from subprocess import call
@@ -25,6 +21,8 @@ from subprocess import call
 import commands
 import pandas as pd
 import StringIO
+
+# Pin setup for RPi board
 
 LED_pin = 11
 switch_pin = 16
@@ -119,8 +117,8 @@ size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
 pygame.display.set_mode(size, pygame.RESIZABLE)
 screen = pygame.display.get_surface()
 pygame.display.set_caption('Photo Booth Pics')
-#pygame.mouse.set_visible(False) #hide the mouse cursor
-#pygame.display.toggle_fullscreen()
+#pygame.mouse.set_visible(False)     # Uncomment out to hide the mouse cursor
+#pygame.display.toggle_fullscreen()  # Uncomment out to run the image display fullscreen
 
 # use RPi board pin numbers
 GPIO.setmode(GPIO.BOARD)
