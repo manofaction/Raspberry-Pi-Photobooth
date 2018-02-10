@@ -13,7 +13,7 @@ Here are the steps involved:
 3. Camera takes the picture
 4. Picture is displayed on-screen for immediate viewing\
 ![photobooth](/images/photobooth_with_preview_350x500.jpg)
-5. RAW image stays on camera for later retrieval\
+5. RAW image stays on camera for later retrieval
 
 
 
