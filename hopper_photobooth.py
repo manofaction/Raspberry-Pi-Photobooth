@@ -2,34 +2,27 @@
 
 """ SETUP  """
 import os
-#import glob
 import time
-#import traceback
 import RPi.GPIO as GPIO
-#import atexit
-#import sys
-#import socket
 import pygame
 from pygame.locals import QUIT, KEYDOWN, K_ESCAPE
 from signal import alarm, signal, SIGALRM, SIGKILL
 import subprocess
 from subprocess import call
-#import commands
-#from threading import Thread
 import pandas as pd
 import StringIO
 
-LED_pin = 11
+LED_pin = 11          # Adjust as necessary for your setup
 switch_pin = 16
 focus_pin = 22
 shutter_pin = 12
 
-monitor_w = 1280
-monitor_h = 800
-transform_x = 1200 # how wide to scale the jpg when replaying
-transform_y = 800 # how high to scale the jpg when replaying
-offset_x = 50 # how far off to left corner to display photos
-offset_y = 0 # how far off to left corner to display photos
+monitor_w = 1280      # Adjust for your screen width
+monitor_h = 800       # Adjust for your screen width
+transform_x = 1200    # how wide to scale the jpg when replaying
+transform_y = 800     # how high to scale the jpg when replaying
+offset_x = 50         # how far off top left corner to display photos
+offset_y = 0          # how far off top left corner to display photos
 backg_fill = 0,0,0
 
 camera_did_not_trigger_filename = "/home/pi/Documents/Python-Photobooth/images/camera_did_not_trigger.png"
@@ -56,6 +49,7 @@ def get_image_filename(image_directory):
     return (image_filename)
 
 def list_files():
+    # This works with a Canon T2i DSLR - I don't know about compatibility with other cameras.
     p = subprocess.Popen(['gphoto2', '--list-files'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     result = p.communicate()[0]
     return result
@@ -80,6 +74,7 @@ def get_filenumber(file_list):
     return(high_filenumber)
 
 def get_file(filenumber, image_filename):
+    # This works with a Canon T2i DSLR - I don't know about compatibility with other cameras.
     call ('gphoto2 ' +
           '--get-file ' +
           '%s ' % filenumber +
@@ -123,6 +118,11 @@ def check_for_updated_filenumber(original_filenumber, timeout_limit = 3):
     return original_filenumber
 
 def test_if_real_button_press():
+    
+    # Random electrical noise often triggers the switch circuit briefly - this tests if the circuit
+    # is still connected after 50 ms and if not it will tell the parent function to ignore it.
+    
+    time.sleep(0.05)
     time.sleep(0.05)
     if GPIO.input(switch_pin) != GPIO.LOW:
         return False
