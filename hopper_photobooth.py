@@ -25,6 +25,7 @@ offset_x = 50         # how far off top left corner to display photos
 offset_y = 0          # how far off top left corner to display photos
 backg_fill = 0,0,0
 
+# Adjust the following paths for your setup:
 camera_did_not_trigger_filename = "/home/pi/Documents/Python-Photobooth/images/camera_did_not_trigger.png"
 processing_filename = "/home/pi/Documents/Python-Photobooth/images/processing.png"
 image_directory = "/home/pi/Documents/photobooth_pics/"
